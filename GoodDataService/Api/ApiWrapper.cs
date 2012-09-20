@@ -12,7 +12,7 @@ namespace GoodDataService.Api
 	public class ApiWrapper : ApiWrapperBase
 	{
 		private static readonly ILog Logger = LogManager.GetLogger(typeof (ApiWrapper));
-		private readonly MandatoryUserFilterActions _mandatoryUserFilterActions = new MandatoryUserFilterActions();
+		private readonly MandatoryUserFilter _mandatoryUserFilter = new MandatoryUserFilter();
 		#region Project
 
 		public string CreateProject(string title, string summary, string template = null, string driver = SystemPlatforms.PostGres)
@@ -767,6 +767,4 @@ namespace GoodDataService.Api
 
 
 	}
-
-	
 }
