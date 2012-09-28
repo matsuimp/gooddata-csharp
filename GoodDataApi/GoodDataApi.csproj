@@ -54,7 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppConfig.cs" />
+    <Compile Include="BoolConvert.cs" />
     <Compile Include="GoodDataConnection.cs" />
+    <Compile Include="Payload\Filters\BasicFilterInfo.cs" />
     <Compile Include="Payload\GoodDataResponse.cs" />
     <Compile Include="Payload\User\AuthenticationResponse.cs" />
     <Compile Include="Resources\MandatoryUserFilter.cs" />

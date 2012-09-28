@@ -10,6 +10,6 @@ namespace GoodDataApi.Payload
 	{
 		public HttpStatusCode Status { get; set; }
 		public string Body { get; set; }
-		public T Result { get; set; }
+		public T Content { get; set; }
 	}
 }
