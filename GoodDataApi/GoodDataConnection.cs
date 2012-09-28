@@ -68,8 +68,6 @@ namespace GoodDataApi
 
         public void Dispose()
         {
-            // close the connection if open
-            // dispose of the http client
             if (null != _client)
             {
                 _client.Dispose();
@@ -146,7 +144,6 @@ namespace GoodDataApi
             var response = request(_client);
             if (_loggedIn && _tokenAcquired && response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                Console.Out.WriteLine("!!!! GETTING A NEW TOKEN !!!!!!!!!!!");
                 GetToken();
                 return request(_client);
             }
