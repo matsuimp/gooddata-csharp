@@ -17,8 +17,8 @@ namespace GoodDataApi
 {
 	internal interface IGoodDataConnection
 	{
-		GoodDataResponse<T> Post<T>(string uri, object payload);
-		GoodDataResponse<T> Get<T>(string uri);
+		GoodDataResponse<T> Post<T>(string uri, object payload, bool checkAuthentication=true);
+		GoodDataResponse<T> Get<T>(string uri, bool checkAuthentication = true);
 	}
 
 	internal static class MimeType
@@ -67,9 +67,11 @@ namespace GoodDataApi
 			
 		}
 
-		public GoodDataResponse<T> Post<T>(string uri, object payload)
+		GoodDataResponse<T> IGoodDataConnection.Post<T>(string uri, object payload, bool checkAuthentication = true)
 		{
-			Authenticate();
+			if (checkAuthentication)
+				Authenticate();
+
 			var json = JsonConvert.SerializeObject(payload, SerializationSettings);
 			var payloadContent = new StringContent(json, Encoding.UTF8, MimeType.Json);
 
@@ -95,9 +97,11 @@ namespace GoodDataApi
 				            };
 		}
 
-		public GoodDataResponse<T> Get<T>(string uri)
+		GoodDataResponse<T> IGoodDataConnection.Get<T>(string uri, bool checkAuthentication = true)
 		{
-			Authenticate();
+			if (checkAuthentication)
+				Authenticate();
+
 			var result = AuthenticationRetry(client => client.GetAsync(uri).Result);
 			var resultContent = result.Content.ReadAsStringAsync().Result;
 			var desirializedResult = default(T);
