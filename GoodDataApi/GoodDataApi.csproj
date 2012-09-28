@@ -56,12 +56,23 @@
     <Compile Include="AppConfig.cs" />
     <Compile Include="BoolConvert.cs" />
     <Compile Include="GoodDataConnection.cs" />
+    <Compile Include="GoodDataStrings.cs" />
+    <Compile Include="MimeType.cs" />
     <Compile Include="Payload\Filters\BasicFilterInfo.cs" />
     <Compile Include="Payload\GoodDataResponse.cs" />
+    <Compile Include="Payload\Project\ProjectResponse.cs" />
+    <Compile Include="Payload\User\CreateDomainUserResponse.cs" />
+    <Compile Include="Payload\User\DomainUsersResponse.cs" />
+    <Compile Include="Payload\User\ProjectUserRequest.cs" />
+    <Compile Include="Payload\User\ProjectUserResponse.cs" />
+    <Compile Include="Payload\User\ProjectUsersResponse.cs" />
     <Compile Include="Payload\User\AuthenticationResponse.cs" />
+    <Compile Include="Payload\User\DomainUserQuery.cs" />
+    <Compile Include="Payload\User\UpdateUserRequest.cs" />
     <Compile Include="Resources\MandatoryUserFilter.cs" />
     <Compile Include="Payload\User\AuthenticationRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\Project.cs" />
     <Compile Include="Resources\User.cs" />
   </ItemGroup>
   <ItemGroup>

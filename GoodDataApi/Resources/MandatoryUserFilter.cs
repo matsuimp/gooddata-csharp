@@ -17,7 +17,7 @@ namespace GoodDataApi.Resources
         
 	}
 
-	internal class MandatoryUserFilter : IMandatoryUserFilter
+	internal sealed class MandatoryUserFilter : IMandatoryUserFilter
 	{
 		private readonly IGoodDataConnection _connection;
 

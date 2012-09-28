@@ -27,6 +27,13 @@ namespace GoodDataApi
 			get { return (string)this["password"]; }
 			set { this["password"] = value; }
 		}
+
+		[ConfigurationProperty("domain", IsRequired = true)]
+		public virtual string DomainName
+		{
+			get { return (string)this["domain"]; }
+			set { this["domain"] = value; }
+		}
 	}
 
 	internal static class ConfigurationManagerExtensions

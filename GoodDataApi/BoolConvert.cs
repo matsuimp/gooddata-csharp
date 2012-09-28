@@ -23,4 +23,23 @@ namespace GoodDataApi
             return objectType == typeof(bool);
         }
     }
+
+	public class EnabledDisabledBoolConvert : JsonConverter
+	{
+		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+		{
+			writer.WriteValue(((bool)value) ? "ENABLED" : "DISABLED");
+		}
+
+		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		{
+			return reader.Value.ToString().Trim().ToUpper() == "ENABLED";
+		}
+
+		public override bool CanConvert(Type objectType)
+		{
+			return objectType == typeof(bool);
+		}
+		
+	}
 }
