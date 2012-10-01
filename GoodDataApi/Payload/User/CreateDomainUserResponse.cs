@@ -22,7 +22,8 @@
 					                 Password = password,
 					                 VerifyPassword = password,
 					                 FirstName = firstName,
-					                 LastName = lastName
+					                 LastName = lastName,
+                                     SsoProvider = "groupcommerce.com"
 				                 };
 		}
 	}
@@ -35,5 +36,6 @@
 		public string VerifyPassword;
 		public string FirstName;
 		public string LastName;
+	    public string SsoProvider;
 	}
 }

@@ -18,10 +18,19 @@ namespace GoodDataApi.Payload.User
 		{
 			User = new CreateProjectUser
 				       {
-					       Content = new CreateProjectUserContent {Enabled = enabled, UserRoles = new List<string>{role}},
+					       Content = new CreateProjectUserContent {Status = enabled, UserRoles = new List<string>{role}},
 					       Links = new CreateProjectUserLinks {Self = profileUri}
 				       };
 		}
+
+        public ProjectUserRequest(string profileUri, bool enabled, List<string> roles)
+        {
+            User = new CreateProjectUser
+            {
+                Content = new CreateProjectUserContent { Status = enabled, UserRoles = roles },
+                Links = new CreateProjectUserLinks { Self = profileUri }
+            };
+        }
 	}
 
 	public class CreateProjectUser
@@ -32,7 +41,7 @@ namespace GoodDataApi.Payload.User
 
 	public class CreateProjectUserContent
 	{
-		public bool Enabled;
+		public bool Status;
 		public List<string> UserRoles;
 	}
 

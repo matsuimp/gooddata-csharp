@@ -5,10 +5,10 @@ namespace GoodDataApi.Payload.User
 {
 	public class ProjectUsersResponse
 	{
-		public ProjectUserContainer[] Users;
+		public ProjectUserPayload[] Users;
 	}
 
-	public class ProjectUserContainer
+	public class ProjectUserPayload
 	{
 		public ProjectUser User;
 	}

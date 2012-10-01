@@ -55,10 +55,17 @@
   <ItemGroup>
     <Compile Include="AppConfig.cs" />
     <Compile Include="BoolConvert.cs" />
+    <Compile Include="Exceptions\GoodDataApiException.cs" />
     <Compile Include="GoodDataConnection.cs" />
     <Compile Include="GoodDataStrings.cs" />
     <Compile Include="MimeType.cs" />
     <Compile Include="Payload\Filters\BasicFilterInfo.cs" />
+    <Compile Include="Payload\Filters\FilterAssignmentRequest.cs" />
+    <Compile Include="Payload\Filters\FilterAssignmentResponse.cs" />
+    <Compile Include="Payload\Filters\FilterCreateRequest.cs" />
+    <Compile Include="Payload\Filters\FilterCreateResponse.cs" />
+    <Compile Include="Payload\Filters\FilterGetResponse.cs" />
+    <Compile Include="Payload\Filters\FilterUpdateResponse.cs" />
     <Compile Include="Payload\GoodDataResponse.cs" />
     <Compile Include="Payload\Project\ProjectResponse.cs" />
     <Compile Include="Payload\User\CreateDomainUserResponse.cs" />
