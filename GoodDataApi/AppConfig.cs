@@ -11,7 +11,7 @@ namespace GoodDataApi
 	{
 		public static AppConfig Instance
 		{
-			get { return ConfigurationManager.GetSection("gooddata") as AppConfig; }
+			get { return ConfigurationManager.GetSection("gooddata2") as AppConfig; }
 		}
 
 		[ConfigurationProperty("login", IsRequired = true)]

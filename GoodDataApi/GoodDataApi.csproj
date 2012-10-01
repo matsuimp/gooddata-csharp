@@ -80,6 +80,7 @@
     <Compile Include="Payload\User\AuthenticationRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Project.cs" />
+    <Compile Include="Resources\ProjectUser.cs" />
     <Compile Include="Resources\User.cs" />
   </ItemGroup>
   <ItemGroup>

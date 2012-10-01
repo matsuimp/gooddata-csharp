@@ -50,9 +50,8 @@ namespace GoodDataApi
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeType.Json));
 
             MandatoryUserFilter = new MandatoryUserFilter(this);
-            var user = new User(this);
-            DomainUser = user;
-            ProjectUser = user;
+            DomainUser = new DomainUser(this);
+			ProjectUser = new Resources.ProjectUser(this);
             Project = new Project(this);
         }
 

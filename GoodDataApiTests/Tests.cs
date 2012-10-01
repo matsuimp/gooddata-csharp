@@ -11,10 +11,14 @@ namespace GoodDataApiTests
 {
     [TestFixture]
     public class Tests
-    { 
+    {
+	    private const string DevProjectId = "us03pustmnl2z7c9jm9vy1f9qiy2ve36";
         [Test]
         public void GenerateScript()
         {
+	        var all = new GoodDataConnection().DomainUser.GetAllUsers();
+			foreach (var user in all)
+				Console.Out.WriteLine(user.Email);
         }
     }
 }
