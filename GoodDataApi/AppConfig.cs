@@ -1,44 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Configuration;
-using System.Linq;
-using System.Text;
+using GoodDataService.Configuration;
+using log4net;
 
 namespace GoodDataApi
 {
-	internal class AppConfig : ConfigurationSection
+	internal class AppConfig
 	{
-		public static AppConfig Instance
+		public static AppConfig Instance = new AppConfig();
+		private static readonly ILog Logger = LogManager.GetLogger(typeof (AppConfig));
+
+		// hopefully temporary until all the functionality in GoodDataService is migrated over to GoodDataApi
+		public AppConfig()
 		{
-			get { return ConfigurationManager.GetSection("gooddata2") as AppConfig; }
+			try
+			{
+				var config = new GoodDataConfigurationSection();
+				Login = config.Login;
+				Password = config.Password;
+				DomainName = config.Domain;
+			}
+			catch (Exception e)
+			{
+				Logger.Error(e);
+				Login = null;
+				Password = null;
+				DomainName = null;
+			}
 		}
 
-		[ConfigurationProperty("login", IsRequired = true)]
-		public virtual string Login
-		{
-			get { return (string)this["login"]; }
-			set { this["login"] = value; }
-		}
-
-		[ConfigurationProperty("password", IsRequired = true)]
-		public virtual string Password
-		{
-			get { return (string)this["password"]; }
-			set { this["password"] = value; }
-		}
-
-		[ConfigurationProperty("domain", IsRequired = true)]
-		public virtual string DomainName
-		{
-			get { return (string)this["domain"]; }
-			set { this["domain"] = value; }
-		}
+		public string Login { get; private set; }
+		public string Password { get; private set; }
+		public string DomainName { get; private set; }
 	}
 
 	internal static class ConfigurationManagerExtensions
 	{
-		public static string ValueOrDefault(this NameValueCollection config, string key, string defaultValue=default(string))
+		public static string ValueOrDefault(this NameValueCollection config, string key, string defaultValue = default(string))
 		{
 			var values = config.GetValues(key);
 

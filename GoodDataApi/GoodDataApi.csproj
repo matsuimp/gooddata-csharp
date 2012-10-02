@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="AppConfig.cs" />
     <Compile Include="BoolConvert.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Exceptions\GoodDataApiException.cs" />
     <Compile Include="GoodDataConnection.cs" />
     <Compile Include="GoodDataStrings.cs" />
@@ -68,6 +69,8 @@
     <Compile Include="Payload\Filters\FilterUpdateResponse.cs" />
     <Compile Include="Payload\GoodDataResponse.cs" />
     <Compile Include="Payload\Project\ProjectResponse.cs" />
+    <Compile Include="Payload\Role\AllRolesResponse.cs" />
+    <Compile Include="Payload\Role\ProjectRoleResponse.cs" />
     <Compile Include="Payload\User\CreateDomainUserResponse.cs" />
     <Compile Include="Payload\User\DomainUsersResponse.cs" />
     <Compile Include="Payload\User\ProjectUserRequest.cs" />
@@ -81,10 +84,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Project.cs" />
     <Compile Include="Resources\ProjectUser.cs" />
+    <Compile Include="Resources\Role.cs" />
     <Compile Include="Resources\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GoodDataService\GoodDataService.csproj">
+      <Project>{9392BEE9-EFEC-48F9-A0C2-AD1FEB33EE3B}</Project>
+      <Name>GoodDataService</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

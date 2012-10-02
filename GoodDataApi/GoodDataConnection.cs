@@ -13,307 +13,310 @@ using GoodDataApi.Resources;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using log4net;
+using ProjectUser = GoodDataApi.Resources.ProjectUser;
 
 namespace GoodDataApi
 {
-    internal interface IGoodDataConnection
-    {
-        string ProfileId { get; }
-        GoodDataResponse<T> Post<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
-        GoodDataResponse<T> Get<T>(string uri, bool checkAuthentication = true, params JsonConverter[] converters);
-        GoodDataResponse<T> Delete<T>(string uri, bool checkAuthentication = true, params JsonConverter[] converters);
-        GoodDataResponse<T> Put<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
-    }
+	internal interface IGoodDataConnection
+	{
+		string ProfileId { get; }
+		GoodDataResponse<T> Post<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
+		GoodDataResponse<T> Get<T>(string uri, bool checkAuthentication = true, params JsonConverter[] converters);
+		GoodDataResponse<T> Delete<T>(string uri, bool checkAuthentication = true, params JsonConverter[] converters);
+		GoodDataResponse<T> Put<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
+	}
 
-    public class GoodDataConnection : IDisposable, IGoodDataConnection
-    {
-        private static readonly ILog Logger = LogManager.GetLogger(typeof (GoodDataConnection));
-        private readonly HttpClient _client;
+	public class GoodDataConnection : IDisposable, IGoodDataConnection
+	{
+		private static readonly ILog Logger = LogManager.GetLogger(typeof (GoodDataConnection));
+		private readonly HttpClient _client;
+		private readonly HttpClientHandler _httpHandler;
 
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly string _email;
-        private readonly HttpClientHandler _httpHandler;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly string _password;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly int _remember;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly string _email;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly string _password;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)] private readonly int _remember;
 
-        private bool _loggedIn;
-        private string _profileId;
-        private bool _tokenAcquired;
+		private bool _loggedIn;
+		private string _profileId;
+		private bool _tokenAcquired;
 
-        public GoodDataConnection(string email, string password, int remember = 0)
-        {
-            _email = email;
-            _password = password;
-            _remember = remember;
+		public GoodDataConnection(string email, string password, int remember = 0)
+		{
+			_email = email;
+			_password = password;
+			_remember = remember;
 
-            _httpHandler = new HttpClientHandler {UseCookies = true};
-            _client = new HttpClient(_httpHandler) {BaseAddress = new Uri(Urls.Base)};
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeType.Json));
+			_httpHandler = new HttpClientHandler {UseCookies = true};
+			_client = new HttpClient(_httpHandler) {BaseAddress = new Uri(Urls.Base)};
+			_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeType.Json));
 
-            MandatoryUserFilter = new MandatoryUserFilter(this);
-            DomainUser = new DomainUser(this);
-			ProjectUser = new Resources.ProjectUser(this);
-            Project = new Project(this);
-        }
+			MandatoryUserFilter = new MandatoryUserFilter(this);
+			DomainUser = new DomainUser(this);
+			ProjectUser = new ProjectUser(this);
+			Project = new Project(this);
+			Role = new Role(this);
+		}
 
-        public GoodDataConnection() : this(AppConfig.Instance.Login, AppConfig.Instance.Password)
-        {
-        }
+		public GoodDataConnection() : this(AppConfig.Instance.Login, AppConfig.Instance.Password)
+		{
+		}
 
-        public IMandatoryUserFilter MandatoryUserFilter { get; private set; }
-        public IGoodDataProjectUser ProjectUser { get; private set; }
-        public IGoodDataDomainUser DomainUser { get; private set; }
-        public IProject Project { get; private set; }
+		public IMandatoryUserFilter MandatoryUserFilter { get; private set; }
+		public IGoodDataProjectUser ProjectUser { get; private set; }
+		public IGoodDataDomainUser DomainUser { get; private set; }
+		public IProject Project { get; private set; }
+		public IRole Role { get; private set; }
 
-        private IGoodDataConnection Conn
-        {
-            get { return this; }
-        }
+		private IGoodDataConnection Conn
+		{
+			get { return this; }
+		}
 
-        public void Dispose()
-        {
-            if (null != _client)
-            {
-                Logout();
-                _client.Dispose();
-            }
-        }
+		public void Dispose()
+		{
+			if (null != _client)
+			{
+				Logout();
+				_client.Dispose();
+			}
+		}
 
-        public string ProfileId
-        {
-            get
-            {
-                Authenticate();
-                return _profileId;
-            }
-        }
+		public string ProfileId
+		{
+			get
+			{
+				Authenticate();
+				return _profileId;
+			}
+		}
 
-        GoodDataResponse<T> IGoodDataConnection.Post<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
-        {
-            if (checkAuthentication)
-                Authenticate();
+		GoodDataResponse<T> IGoodDataConnection.Post<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
+		{
+			if (checkAuthentication)
+				Authenticate();
 
-            var convertArgs = converters == null || converters.Length == 0
-                                  ? new List<JsonConverter> {new BoolConverter()}
-                                  : converters.ToList();
+			var convertArgs = converters == null || converters.Length == 0
+				                  ? new List<JsonConverter> {new BoolConverter()}
+				                  : converters.ToList();
 
-            var settings = new JsonSerializerSettings
-                               {
-                                   ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                   NullValueHandling = NullValueHandling.Ignore,
-                                   Converters = convertArgs
-                               };
+			var settings = new JsonSerializerSettings
+				               {
+					               ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					               NullValueHandling = NullValueHandling.Ignore,
+					               Converters = convertArgs
+				               };
 
-            var result = AuthenticationRetry(client =>
-                                                 {
-                                                     var json = JsonConvert.SerializeObject(payload, settings);
-                                                     var payloadContent = new StringContent(json, Encoding.UTF8, MimeType.Json);
-                                                     return client.PostAsync(uri, payloadContent).Result;
-                                                 });
-            var resultContent = result.Content.ReadAsStringAsync().Result;
-            var desirializedResult = default(T);
+			var result = AuthenticationRetry(client =>
+				                                 {
+					                                 var json = JsonConvert.SerializeObject(payload, settings);
+					                                 var payloadContent = new StringContent(json, Encoding.UTF8, MimeType.Json);
+					                                 return client.PostAsync(uri, payloadContent).Result;
+				                                 });
+			var resultContent = result.Content.ReadAsStringAsync().Result;
+			var desirializedResult = default(T);
 
-            try
-            {
-                desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
-            }
-
-
-            return new GoodDataResponse<T>
-                       {
-                           Status = result.StatusCode,
-                           Body = resultContent,
-                           Content = desirializedResult,
-                       };
-        }
-
-        GoodDataResponse<T> IGoodDataConnection.Put<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
-        {
-            if (checkAuthentication)
-                Authenticate();
-
-            var convertArgs = converters == null || converters.Length == 0
-                                  ? new List<JsonConverter> {new BoolConverter()}
-                                  : converters.ToList();
-
-            var settings = new JsonSerializerSettings
-                               {
-                                   ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                   NullValueHandling = NullValueHandling.Ignore,
-                                   Converters = convertArgs
-                               };
-
-            var result = AuthenticationRetry(client =>
-                                                 {
-                                                     var json = JsonConvert.SerializeObject(payload, settings);
-                                                     var payloadContent = new StringContent(json, Encoding.UTF8, MimeType.Json);
-                                                     return client.PutAsync(uri, payloadContent).Result;
-                                                 });
-            var resultContent = result.Content.ReadAsStringAsync().Result;
-            var desirializedResult = default(T);
-
-            try
-            {
-                desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
-            }
+			try
+			{
+				desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
+			}
+			catch (Exception e)
+			{
+				Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
+			}
 
 
-            return new GoodDataResponse<T>
-                       {
-                           Status = result.StatusCode,
-                           Body = resultContent,
-                           Content = desirializedResult,
-                       };
-        }
+			return new GoodDataResponse<T>
+				       {
+					       Status = result.StatusCode,
+					       Body = resultContent,
+					       Content = desirializedResult,
+				       };
+		}
 
-        GoodDataResponse<T> IGoodDataConnection.Get<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
-        {
-            if (checkAuthentication)
-                Authenticate();
+		GoodDataResponse<T> IGoodDataConnection.Put<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
+		{
+			if (checkAuthentication)
+				Authenticate();
 
-            var result = AuthenticationRetry(client => client.GetAsync(uri).Result);
-            var resultContent = result.Content.ReadAsStringAsync().Result;
-            var desirializedResult = default(T);
+			var convertArgs = converters == null || converters.Length == 0
+				                  ? new List<JsonConverter> {new BoolConverter()}
+				                  : converters.ToList();
 
-            var convertArgs = converters == null || converters.Length == 0
-                                  ? new List<JsonConverter> {new BoolConverter()}
-                                  : converters.ToList();
+			var settings = new JsonSerializerSettings
+				               {
+					               ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					               NullValueHandling = NullValueHandling.Ignore,
+					               Converters = convertArgs
+				               };
 
-            var settings = new JsonSerializerSettings
-                               {
-                                   ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                   NullValueHandling = NullValueHandling.Ignore,
-                                   Converters = convertArgs
-                               };
+			var result = AuthenticationRetry(client =>
+				                                 {
+					                                 var json = JsonConvert.SerializeObject(payload, settings);
+					                                 var payloadContent = new StringContent(json, Encoding.UTF8, MimeType.Json);
+					                                 return client.PutAsync(uri, payloadContent).Result;
+				                                 });
+			var resultContent = result.Content.ReadAsStringAsync().Result;
+			var desirializedResult = default(T);
 
-            try
-            {
-                desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
-            }
-
-
-            return new GoodDataResponse<T>
-                       {
-                           Status = result.StatusCode,
-                           Body = resultContent,
-                           Content = desirializedResult,
-                       };
-        }
-
-        GoodDataResponse<T> IGoodDataConnection.Delete<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
-        {
-            if (checkAuthentication)
-                Authenticate();
-
-            var result = AuthenticationRetry(client => client.DeleteAsync(uri).Result);
-            var resultContent = result.Content.ReadAsStringAsync().Result;
-            var desirializedResult = default(T);
-
-            var convertArgs = converters == null || converters.Length == 0
-                                  ? new List<JsonConverter> {new BoolConverter()}
-                                  : converters.ToList();
-
-            var settings = new JsonSerializerSettings
-                               {
-                                   ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                   NullValueHandling = NullValueHandling.Ignore,
-                                   Converters = convertArgs
-                               };
+			try
+			{
+				desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
+			}
+			catch (Exception e)
+			{
+				Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
+			}
 
 
-            try
-            {
-                desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
-            }
-            catch (Exception e)
-            {
-                Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
-            }
+			return new GoodDataResponse<T>
+				       {
+					       Status = result.StatusCode,
+					       Body = resultContent,
+					       Content = desirializedResult,
+				       };
+		}
+
+		GoodDataResponse<T> IGoodDataConnection.Get<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
+		{
+			if (checkAuthentication)
+				Authenticate();
+
+			var result = AuthenticationRetry(client => client.GetAsync(uri).Result);
+			var resultContent = result.Content.ReadAsStringAsync().Result;
+			var desirializedResult = default(T);
+
+			var convertArgs = converters == null || converters.Length == 0
+				                  ? new List<JsonConverter> {new BoolConverter()}
+				                  : converters.ToList();
+
+			var settings = new JsonSerializerSettings
+				               {
+					               ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					               NullValueHandling = NullValueHandling.Ignore,
+					               Converters = convertArgs
+				               };
+
+			try
+			{
+				desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
+			}
+			catch (Exception e)
+			{
+				Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
+			}
 
 
-            return new GoodDataResponse<T>
-                       {
-                           Status = result.StatusCode,
-                           Body = resultContent,
-                           Content = desirializedResult,
-                       };
-        }
+			return new GoodDataResponse<T>
+				       {
+					       Status = result.StatusCode,
+					       Body = resultContent,
+					       Content = desirializedResult,
+				       };
+		}
 
-        private HttpResponseMessage AuthenticationRetry(Func<HttpClient, HttpResponseMessage> request)
-        {
-            var response = request(_client);
-            if (_loggedIn && _tokenAcquired && response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                GetToken();
-                return request(_client);
-            }
-            return response;
-        }
+		GoodDataResponse<T> IGoodDataConnection.Delete<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
+		{
+			if (checkAuthentication)
+				Authenticate();
 
-        private void Authenticate()
-        {
-            if (!_loggedIn)
-                Login();
+			var result = AuthenticationRetry(client => client.DeleteAsync(uri).Result);
+			var resultContent = result.Content.ReadAsStringAsync().Result;
+			var desirializedResult = default(T);
 
-            if (!_tokenAcquired)
-                GetToken();
-        }
+			var convertArgs = converters == null || converters.Length == 0
+				                  ? new List<JsonConverter> {new BoolConverter()}
+				                  : converters.ToList();
 
-        private void Login()
-        {
-            var payload = new AuthenticationRequest {PostUserLogin = new PostUserLogin {Login = _email, Password = _password, Remember = _remember}};
-            var result = Conn.Post<AuthenticationResponse>(Urls.Login, payload, false);
-            _profileId = GoodDataStrings.IdFromUri(result.Content.UserLogin.Profile);
-            _loggedIn = result.Status == HttpStatusCode.OK;
-        }
+			var settings = new JsonSerializerSettings
+				               {
+					               ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					               NullValueHandling = NullValueHandling.Ignore,
+					               Converters = convertArgs
+				               };
 
-        private void Logout()
-        {
-            // i don't know why this doesn't work? it returns a 404.
-            //if (!_loggedIn || !_tokenAcquired)
-            //	return;
 
-            //Conn.Delete<string>(Urls.Logout(ProfileId), false);
-        }
+			try
+			{
+				desirializedResult = JsonConvert.DeserializeObject<T>(resultContent, settings);
+			}
+			catch (Exception e)
+			{
+				Logger.Error(string.Format("Could not deserialize type {0}", typeof (T).FullName), e);
+			}
 
-        private void GetToken()
-        {
-            var result = Conn.Get<object>(Urls.Token, false);
-            _tokenAcquired = result.Status == HttpStatusCode.OK;
-        }
 
-        private static class Urls
-        {
-            public static string Base
-            {
-                get { return ConfigurationManager.AppSettings.ValueOrDefault("GoodData.BaseUrl", @"https://secure.gooddata.com"); }
-            }
+			return new GoodDataResponse<T>
+				       {
+					       Status = result.StatusCode,
+					       Body = resultContent,
+					       Content = desirializedResult,
+				       };
+		}
 
-            public static string Login
-            {
-                get { return ConfigurationManager.AppSettings.ValueOrDefault("GoodData.LoginUrl", @"/gdc/account/login"); }
-            }
+		private HttpResponseMessage AuthenticationRetry(Func<HttpClient, HttpResponseMessage> request)
+		{
+			var response = request(_client);
+			if (_loggedIn && _tokenAcquired && response.StatusCode == HttpStatusCode.Unauthorized)
+			{
+				GetToken();
+				return request(_client);
+			}
+			return response;
+		}
 
-            public static string Token
-            {
-                get { return ConfigurationManager.AppSettings.ValueOrDefault("GoodData.TokenUrl", @"/gdc/account/token"); }
-            }
+		private void Authenticate()
+		{
+			if (!_loggedIn)
+				Login();
 
-            public static string Logout(string profileId)
-            {
-                return string.Format(ConfigurationManager.AppSettings.ValueOrDefault("GoodData.LogoutUrl", @"/gdc/account/{0}"), profileId);
-            }
-        }
-    }
+			if (!_tokenAcquired)
+				GetToken();
+		}
+
+		private void Login()
+		{
+			var payload = new AuthenticationRequest {PostUserLogin = new PostUserLogin {Login = _email, Password = _password, Remember = _remember}};
+			var result = Conn.Post<AuthenticationResponse>(Urls.Login, payload, false);
+			_profileId = GoodDataStrings.IdFromUri(result.Content.UserLogin.Profile);
+			_loggedIn = result.Status == HttpStatusCode.OK;
+		}
+
+		private void Logout()
+		{
+			// i don't know why this doesn't work? it returns a 404.
+			//if (!_loggedIn || !_tokenAcquired)
+			//	return;
+
+			//Conn.Delete<string>(Urls.Logout(ProfileId), false);
+		}
+
+		private void GetToken()
+		{
+			var result = Conn.Get<object>(Urls.Token, false);
+			_tokenAcquired = result.Status == HttpStatusCode.OK;
+		}
+
+		private static class Urls
+		{
+			public static string Base
+			{
+				get { return ConfigurationManager.AppSettings.ValueOrDefault("GoodData.BaseUrl", @"https://secure.gooddata.com"); }
+			}
+
+			public static string Login
+			{
+				get { return ConfigurationManager.AppSettings.ValueOrDefault("GoodData.LoginUrl", @"/gdc/account/login"); }
+			}
+
+			public static string Token
+			{
+				get { return ConfigurationManager.AppSettings.ValueOrDefault("GoodData.TokenUrl", @"/gdc/account/token"); }
+			}
+
+			public static string Logout(string profileId)
+			{
+				return string.Format(ConfigurationManager.AppSettings.ValueOrDefault("GoodData.LogoutUrl", @"/gdc/account/{0}"), profileId);
+			}
+		}
+	}
 }
