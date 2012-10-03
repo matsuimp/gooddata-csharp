@@ -15,7 +15,7 @@ namespace GoodDataApi
 		{
 			try
 			{
-				var config = new GoodDataConfigurationSection();
+				var config = GoodDataConfigurationSection.GetConfig();
 				Login = config.Login;
 				Password = config.Password;
 				DomainName = config.Domain;

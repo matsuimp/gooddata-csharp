@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using GoodDataApi.Exceptions;
 using GoodDataApi.Payload;
 using GoodDataApi.Payload.User;
 using GoodDataApi.Resources;
@@ -279,6 +280,9 @@ namespace GoodDataApi
 			var result = Conn.Post<AuthenticationResponse>(Urls.Login, payload, false);
 			_profileId = GoodDataStrings.IdFromUri(result.Content.UserLogin.Profile);
 			_loggedIn = result.Status == HttpStatusCode.OK;
+
+			if (!_loggedIn)
+				throw new GoodDataApiException(string.Format("Unabled to login to GoodData. Status Code = {0}", result.Status));
 		}
 
 		private void Logout()
@@ -294,6 +298,9 @@ namespace GoodDataApi
 		{
 			var result = Conn.Get<object>(Urls.Token, false);
 			_tokenAcquired = result.Status == HttpStatusCode.OK;
+
+			if (!_tokenAcquired)
+				throw new GoodDataApiException(string.Format("Unabled to acquire token to communicate with GoodData. Status Code = {0}", result.Status));
 		}
 
 		private static class Urls
