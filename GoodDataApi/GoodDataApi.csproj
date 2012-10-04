@@ -67,6 +67,7 @@
     <Compile Include="Payload\Filters\FilterCreateResponse.cs" />
     <Compile Include="Payload\Filters\FilterGetResponse.cs" />
     <Compile Include="Payload\Filters\FilterUpdateResponse.cs" />
+    <Compile Include="Payload\Filters\GetFilterAssignmentsResponse.cs" />
     <Compile Include="Payload\GoodDataResponse.cs" />
     <Compile Include="Payload\Project\ProjectResponse.cs" />
     <Compile Include="Payload\Role\AllRolesResponse.cs" />

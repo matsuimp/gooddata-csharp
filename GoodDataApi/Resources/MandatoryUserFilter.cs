@@ -12,6 +12,7 @@ namespace GoodDataApi.Resources
         GoodDataResponse<FilterCreateResponse> Update(string uri, FilterCreateRequest request);
         GoodDataResponse<object> Delete(string uri);
         GoodDataResponse<UserFilterGetResponse> Get(string uri);
+        GoodDataResponse<GetFilterAssignmentsResponse> GetAssignments(string projectId, string profileId);
     }
 
     internal sealed class MandatoryUserFilter : IMandatoryUserFilter
@@ -54,6 +55,11 @@ namespace GoodDataApi.Resources
             return _connection.Get<UserFilterGetResponse>(uri);
         }
 
+        public GoodDataResponse<GetFilterAssignmentsResponse> GetAssignments(string projectId, string profileId)
+        {
+            return _connection.Get<GetFilterAssignmentsResponse>(Urls.GetAssignments(projectId, profileId));
+        }
+
 
         private static class Urls
         {
@@ -71,6 +77,13 @@ namespace GoodDataApi.Resources
             {
                 return string.Format(ConfigurationManager.AppSettings.ValueOrDefault("GoodData.MandatoryUserFilter.Assign", "/gdc/md/{0}/userfilters"), projectId);
             }
+
+            public static string GetAssignments(string projectId, string profileId)
+            {
+                return string.Format(ConfigurationManager.AppSettings.ValueOrDefault("GoodData.MandatoryuserFilter.GetAssignments", "/gdc/md/{0}/userfilters?users={1}"), projectId, profileId);
+            }
+
+
         }
     }
 }
