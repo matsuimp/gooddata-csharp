@@ -60,6 +60,8 @@
     <Compile Include="GoodDataConnection.cs" />
     <Compile Include="GoodDataStrings.cs" />
     <Compile Include="MimeType.cs" />
+    <Compile Include="Payload\Attribute\GetAttributeResponse.cs" />
+    <Compile Include="Payload\Attribute\GetElementsResponse.cs" />
     <Compile Include="Payload\Filters\BasicFilterInfo.cs" />
     <Compile Include="Payload\Filters\FilterAssignmentRequest.cs" />
     <Compile Include="Payload\Filters\FilterAssignmentResponse.cs" />
@@ -80,6 +82,8 @@
     <Compile Include="Payload\User\AuthenticationResponse.cs" />
     <Compile Include="Payload\User\DomainUserQuery.cs" />
     <Compile Include="Payload\User\UpdateUserRequest.cs" />
+    <Compile Include="ResourceExtensions\MandatoryUserFilterExtensions.cs" />
+    <Compile Include="Resources\Attribute.cs" />
     <Compile Include="Resources\MandatoryUserFilter.cs" />
     <Compile Include="Payload\User\AuthenticationRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

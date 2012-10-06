@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Configuration;
 using GoodDataApi.Payload;
 using GoodDataApi.Payload.Filters;
@@ -59,7 +60,6 @@ namespace GoodDataApi.Resources
         {
             return _connection.Get<GetFilterAssignmentsResponse>(Urls.GetAssignments(projectId, profileId));
         }
-
 
         private static class Urls
         {

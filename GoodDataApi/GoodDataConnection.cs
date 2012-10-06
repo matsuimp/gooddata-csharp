@@ -56,6 +56,8 @@ namespace GoodDataApi
 			ProjectUser = new ProjectUser(this);
 			Project = new Project(this);
 			Role = new Role(this);
+			Attribute = new Resources.Attribute(this);
+
 		}
 
 		public GoodDataConnection() : this(AppConfig.Instance.Login, AppConfig.Instance.Password)
@@ -67,6 +69,7 @@ namespace GoodDataApi
 		public IGoodDataDomainUser DomainUser { get; private set; }
 		public IProject Project { get; private set; }
 		public IRole Role { get; private set; }
+		public IGoodDataAttribute Attribute { get; private set; }
 
 		private IGoodDataConnection Conn
 		{
