@@ -2,12 +2,16 @@
 using System.Diagnostics;
 using System.Web;
 using GoodDataService.Configuration;
+using Newtonsoft.Json;
 
 namespace GoodDataService.SSO
 {
 	public class SsoProvider
 	{
-		private System.Object lockThis = new System.Object();
+		private static readonly object Locker = new object();
+		private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		private const int ThirtySixHours = (60*36);
+
 		public SsoProvider()
 		{
 			Config = GoodDataConfigurationSection.GetConfig();
@@ -17,11 +21,10 @@ namespace GoodDataService.SSO
 
 		public string GenerateToken(string email, int validaityOffsetInMinutes = 10)
 		{
-
-			var userData = CreateUserData(email);
+			var userData = CreateUserData(email, validaityOffsetInMinutes);
 			Trace.Write(userData);
-			
-	        lock (lockThis)
+
+			lock (Locker)
 	        {
 	        	var gpg = new GnuPgpProcessor();
 	        	var signedData = gpg.Sign(Config.Passphrase, userData);
@@ -33,10 +36,13 @@ namespace GoodDataService.SSO
 		}
 
 
-		private static string CreateUserData(string email, int validaityOffsetInMinutes = 10)
+		private static string CreateUserData(string email, int validityOffsetInMinutes = 10)
 		{
-			return "{\"email\":\"" + email + "\",\"validity\":" +
-			       Math.Round(DateTime.UtcNow.AddMinutes(validaityOffsetInMinutes).ToUnixTime()) + "}";
+			if (validityOffsetInMinutes > ThirtySixHours)
+				throw new InvalidOperationException("GoodData does not support sessions longer than 36 hours. See, http://developer.gooddata.com/core-concepts/integrations-sso-user-provisioning/single-sign-on");
+
+			var validity = Convert.ToInt32((DateTime.UtcNow.AddMinutes(validityOffsetInMinutes) - UnixEpoch).TotalSeconds);
+			return JsonConvert.SerializeObject(new {email, validity});
 		}
 
 		private static string EncodeUserData(string input)

@@ -14,15 +14,5 @@ namespace GoodDataService
 			var startIndex = value.LastIndexOf('/') + 1;
 			return value.Substring(startIndex, value.Length - startIndex);
 		}
-
-		/// <summary>
-		/// 	Use Universal time.
-		/// </summary>
-		/// <param name = "dateTime"></param>
-		/// <returns></returns>
-		public static double ToUnixTime(this DateTime dateTime)
-		{
-			return (dateTime - new DateTime(1970, 1, 1).ToLocalTime()).TotalSeconds;
-		}
 	}
 }
