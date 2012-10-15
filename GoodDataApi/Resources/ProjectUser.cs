@@ -13,9 +13,9 @@ namespace GoodDataApi.Resources
 
 	internal sealed class ProjectUser : IGoodDataProjectUser
 	{
-		private readonly IGoodDataConnection _connection;
+		private readonly IInternalGoodDataConnection _connection;
 
-		public ProjectUser(IGoodDataConnection connection)
+		public ProjectUser(IInternalGoodDataConnection connection)
 		{
 			_connection = connection;
 		}

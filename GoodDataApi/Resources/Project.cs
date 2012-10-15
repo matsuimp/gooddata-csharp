@@ -12,9 +12,9 @@ namespace GoodDataApi.Resources
 
 	internal sealed class Project : IProject
 	{
-		private readonly IGoodDataConnection _connection;
+		private readonly IInternalGoodDataConnection _connection;
 
-		public Project(IGoodDataConnection connection)
+		public Project(IInternalGoodDataConnection connection)
 		{
 			_connection = connection;
 		}

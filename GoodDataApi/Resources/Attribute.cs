@@ -11,9 +11,9 @@ namespace GoodDataApi.Resources
 
 	internal sealed class Attribute : IGoodDataAttribute
 	{
-		private readonly IGoodDataConnection _connection;
+		private readonly IInternalGoodDataConnection _connection;
 
-		public Attribute(IGoodDataConnection connection)
+		public Attribute(IInternalGoodDataConnection connection)
 		{
 			_connection = connection;
 		}

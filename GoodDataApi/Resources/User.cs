@@ -18,9 +18,9 @@ namespace GoodDataApi.Resources
 
 	internal sealed class DomainUser : IGoodDataDomainUser
 	{
-		private readonly IGoodDataConnection _connection;
+		private readonly IInternalGoodDataConnection _connection;
 
-		public DomainUser(IGoodDataConnection connection)
+		public DomainUser(IInternalGoodDataConnection connection)
 		{
 			_connection = connection;
 		}

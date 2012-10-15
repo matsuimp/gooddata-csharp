@@ -17,9 +17,9 @@ namespace GoodDataApi.Resources
 
 	internal sealed class Role : IRole
 	{
-		private readonly IGoodDataConnection _connection;
+		private readonly IInternalGoodDataConnection _connection;
 
-		public Role(IGoodDataConnection connection)
+		public Role(IInternalGoodDataConnection connection)
 		{
 			_connection = connection;
 		}

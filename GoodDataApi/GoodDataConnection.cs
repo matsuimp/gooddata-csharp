@@ -18,7 +18,17 @@ using ProjectUser = GoodDataApi.Resources.ProjectUser;
 
 namespace GoodDataApi
 {
-	internal interface IGoodDataConnection
+	public interface IGoodDataConnection
+	{
+		IMandatoryUserFilter MandatoryUserFilter { get; }
+		IGoodDataProjectUser ProjectUser { get; }
+		IGoodDataDomainUser DomainUser { get; }
+		IProject Project { get; }
+		IRole Role { get; }
+		IGoodDataAttribute Attribute { get; }
+	}
+
+	internal interface IInternalGoodDataConnection
 	{
 		string ProfileId { get; }
 		GoodDataResponse<T> Post<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
@@ -27,7 +37,7 @@ namespace GoodDataApi
 		GoodDataResponse<T> Put<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
 	}
 
-	public class GoodDataConnection : IDisposable, IGoodDataConnection
+	public class GoodDataConnection : IDisposable, IInternalGoodDataConnection, IGoodDataConnection
 	{
 		private static readonly ILog Logger = LogManager.GetLogger(typeof (GoodDataConnection));
 		private readonly HttpClient _client;
@@ -71,7 +81,7 @@ namespace GoodDataApi
 		public IRole Role { get; private set; }
 		public IGoodDataAttribute Attribute { get; private set; }
 
-		private IGoodDataConnection Conn
+		private IInternalGoodDataConnection Conn
 		{
 			get { return this; }
 		}
@@ -94,7 +104,7 @@ namespace GoodDataApi
 			}
 		}
 
-		GoodDataResponse<T> IGoodDataConnection.Post<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
+		GoodDataResponse<T> IInternalGoodDataConnection.Post<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
 		{
 			if (checkAuthentication)
 				Authenticate();
@@ -137,7 +147,7 @@ namespace GoodDataApi
 				       };
 		}
 
-		GoodDataResponse<T> IGoodDataConnection.Put<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
+		GoodDataResponse<T> IInternalGoodDataConnection.Put<T>(string uri, object payload, bool checkAuthentication, params JsonConverter[] converters)
 		{
 			if (checkAuthentication)
 				Authenticate();
@@ -180,7 +190,7 @@ namespace GoodDataApi
 				       };
 		}
 
-		GoodDataResponse<T> IGoodDataConnection.Get<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
+		GoodDataResponse<T> IInternalGoodDataConnection.Get<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
 		{
 			if (checkAuthentication)
 				Authenticate();
@@ -218,7 +228,7 @@ namespace GoodDataApi
 				       };
 		}
 
-		GoodDataResponse<T> IGoodDataConnection.Delete<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
+		GoodDataResponse<T> IInternalGoodDataConnection.Delete<T>(string uri, bool checkAuthentication, params JsonConverter[] converters)
 		{
 			if (checkAuthentication)
 				Authenticate();
