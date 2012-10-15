@@ -56,19 +56,21 @@ namespace GoodDataApi.Resources
 			if (null == domainName)
 				domainName = AppConfig.Instance.DomainName;
 
-			string next = "anything";
-			var result = GetUsers(domainName: domainName);
-			while (!string.IsNullOrWhiteSpace(next))
+			string nextUrl = null;
+			var result = GetUsers(domainName: domainName).AssertSuccess();
+			do
 			{
-				if (result.Status != HttpStatusCode.OK)
-					throw new GoodDataApiException(result.Body);
-
-				foreach (var container in result.Content.AccountSettings.Items)
+				if (!string.IsNullOrWhiteSpace(nextUrl))
+				{
+					result = _connection.Get<DomainUsersResponse>(nextUrl).AssertSuccess();
+				}
+					
+				foreach (var container in result.AccountSettings.Items)
 					yield return container.AccountSetting;
 
-				next = result.Content.AccountSettings.Paging.Next;
-				result = _connection.Get<DomainUsersResponse>(next);
-			}
+				nextUrl = result.AccountSettings.Paging.Next;
+
+			} while (!string.IsNullOrWhiteSpace(nextUrl));
 		}
 	}
 
