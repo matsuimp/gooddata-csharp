@@ -4,13 +4,13 @@ using GoodDataApi.Payload.Project;
 
 namespace GoodDataApi.Resources
 {
-	public interface IProject
+	public interface IGoodDataProject
 	{
 		GoodDataResponse<ProjectResponse> Get(string projectId);
 		GoodDataResponse<AllProjectsResponse> All();
 	}
 
-	internal sealed class Project : IProject
+	internal sealed class Project : IGoodDataProject
 	{
 		private readonly IInternalGoodDataConnection _connection;
 

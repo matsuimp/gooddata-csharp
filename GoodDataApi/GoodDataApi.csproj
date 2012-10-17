@@ -72,6 +72,12 @@
     <Compile Include="Payload\Filters\GetFilterAssignmentsResponse.cs" />
     <Compile Include="Payload\GoodDataResponse.cs" />
     <Compile Include="Payload\Project\ProjectResponse.cs" />
+    <Compile Include="Payload\Report\ExecuteReportRequest.cs" />
+    <Compile Include="Payload\Report\ExecuteReportResponse.cs" />
+    <Compile Include="Payload\Report\ExportReportRequest.cs" />
+    <Compile Include="Payload\Report\ExportReportResponse.cs" />
+    <Compile Include="Payload\Report\GetReportResponse.cs" />
+    <Compile Include="Payload\Report\GetReportsResponse.cs" />
     <Compile Include="Payload\Role\AllRolesResponse.cs" />
     <Compile Include="Payload\Role\ProjectRoleResponse.cs" />
     <Compile Include="Payload\User\CreateDomainUserResponse.cs" />
@@ -89,8 +95,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\Project.cs" />
     <Compile Include="Resources\ProjectUser.cs" />
+    <Compile Include="Resources\Report.cs" />
     <Compile Include="Resources\Role.cs" />
-    <Compile Include="Resources\User.cs" />
+    <Compile Include="Resources\DomainUser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

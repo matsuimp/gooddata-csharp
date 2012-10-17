@@ -8,14 +8,14 @@ using GoodDataApi.Payload.Role;
 
 namespace GoodDataApi.Resources
 {
-	public interface IRole
+	public interface IGoodDataRole
 	{
 		GoodDataResponse<AllProjectRolesResponse> All(string projectId);
 		GoodDataResponse<ProjectRoleResponse> Get(string roleUri);
 		string Find(string projectId, string roleIdentifier);
 	}
 
-	internal sealed class Role : IRole
+	internal sealed class Role : IGoodDataRole
 	{
 		private readonly IInternalGoodDataConnection _connection;
 

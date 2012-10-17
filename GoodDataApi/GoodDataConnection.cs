@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -23,8 +24,8 @@ namespace GoodDataApi
 		IMandatoryUserFilter MandatoryUserFilter { get; }
 		IGoodDataProjectUser ProjectUser { get; }
 		IGoodDataDomainUser DomainUser { get; }
-		IProject Project { get; }
-		IRole Role { get; }
+		IGoodDataProject Project { get; }
+		IGoodDataRole Role { get; }
 		IGoodDataAttribute Attribute { get; }
 	}
 
@@ -35,6 +36,7 @@ namespace GoodDataApi
 		GoodDataResponse<T> Get<T>(string uri, bool checkAuthentication = true, params JsonConverter[] converters);
 		GoodDataResponse<T> Delete<T>(string uri, bool checkAuthentication = true, params JsonConverter[] converters);
 		GoodDataResponse<T> Put<T>(string uri, object payload, bool checkAuthentication = true, params JsonConverter[] converters);
+		void Download(string uri, string targetPath);
 	}
 
 	public class GoodDataConnection : IDisposable, IInternalGoodDataConnection, IGoodDataConnection
@@ -67,7 +69,7 @@ namespace GoodDataApi
 			Project = new Project(this);
 			Role = new Role(this);
 			Attribute = new Resources.Attribute(this);
-
+			Report = new Report(this);
 		}
 
 		public GoodDataConnection() : this(AppConfig.Instance.Login, AppConfig.Instance.Password)
@@ -77,9 +79,10 @@ namespace GoodDataApi
 		public IMandatoryUserFilter MandatoryUserFilter { get; private set; }
 		public IGoodDataProjectUser ProjectUser { get; private set; }
 		public IGoodDataDomainUser DomainUser { get; private set; }
-		public IProject Project { get; private set; }
-		public IRole Role { get; private set; }
+		public IGoodDataProject Project { get; private set; }
+		public IGoodDataRole Role { get; private set; }
 		public IGoodDataAttribute Attribute { get; private set; }
+		public IGoodDataReport Report { get; private set; }
 
 		private IInternalGoodDataConnection Conn
 		{
@@ -265,6 +268,15 @@ namespace GoodDataApi
 					       Body = resultContent,
 					       Content = desirializedResult,
 				       };
+		}
+
+		void IInternalGoodDataConnection.Download(string uri, string targetPath)
+		{
+			var result = AuthenticationRetry(client => client.GetAsync(uri).Result);
+			using (var fileStream = new FileStream(targetPath, FileMode.CreateNew))
+			{
+				result.Content.CopyToAsync(fileStream).Wait();
+			}
 		}
 
 		private HttpResponseMessage AuthenticationRetry(Func<HttpClient, HttpResponseMessage> request)
